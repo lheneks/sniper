@@ -1,0 +1,66 @@
+﻿<div class="row">
+    <h2>Configure a search</h2>
+    <div class="col-sm-12">
+        <div class="col-sm-4">
+            <div><label>Name</label></div>
+            <div><input ng-model="model.Name" /></div>
+        </div>
+        <div class="col-sm-4">
+            <div><label>Keywords</label></div>
+            <div><input ng-model="model.Keywords" /></div>
+        </div>
+        <div class="col-sm-4">
+            <div><label>Target Price</label></div>
+            <div><input ng-model="model.TargetPrice" /></div>
+        </div>
+    </div>
+    <div class="col-sm-12">
+        <div class="col-sm-4">
+            <div><label>Foil Ok?</label></div>
+            <div><input ng-model="model.FoilOk" /></div>
+        </div>
+        <div class="col-sm-4">
+            <div><label>Foil Target Price</label></div>
+            <div><input ng-model="model.FoilTargetPrice" /></div>
+        </div>
+        <div class="col-sm-4">
+            <button class="btn btn-sm pull-right" ng-click="saveConfig()">Save</button>
+            <div ng-if="showSavedMessage">Saved.</div>
+        </div>
+    </div>
+</div>
+
+<br/>
+<hr/>
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="col-sm-2" ng-if="latestRun">
+            <div>Filter</div><div><input type="text" ng-model="model.filterText" /></div>
+        </div>
+        
+        <div class="col-sm-4" ng-if="latestRun">
+            <h3>Last run: {{latestRun.SearchTime}}</h3>
+        </div>
+    </div>
+</div>
+
+
+<div class="row" ng-if="latestRun">
+    <div class="col-sm-12">
+        <table>
+            <tr>
+                <td>Title</td>
+                <td>Current Price</td>
+                <td>Unit Price</td>
+                <td>Buy it now</td>
+            </tr>
+            <tr ng-repeat="item in latestRun.Results | filter:filterFn" ng-class="calculateItemClass(model, item)">
+                <td><a href="{{item.ViewItemURL}}">{{item.Title}}</a></td>
+                <td>{{item.SellingStatus.CurrentPrice}}</td>
+                <td>{{item.UnitPrice}}</td>
+                <td>{{item.ListingInfo.BuyItNowAvailable}}</td>
+            </tr>
+        </table>
+    </div>
+</div>
