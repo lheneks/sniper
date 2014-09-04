@@ -83,7 +83,7 @@ var CreateOrEditSearchConfigCtrl = ['$scope', '$http', '$routeParams', 'searchCo
             
             console.log(String.format('item.UnitPrice: {0} < model.TargetPrice: {1}', item.UnitPrice, model.TargetPrice));
             
-            if (item.UnitPrice < model.TargetPrice)
+            if (Number(item.UnitPrice) < Number(model.TargetPrice))
                 return 'match';
 
             return '';
