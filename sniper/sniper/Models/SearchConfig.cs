@@ -42,12 +42,14 @@ namespace sniper.Models
     public class ShippingInfo
     {
         public string ShippingType { get; set; }
+        public double? ShippingServiceCost { get; set; }
     }
 
     public class ListingInfo
     {
         public bool BestOfferEnabled { get; set; }
         public bool BuyItNowAvailable { get; set; }
+        public double? BuyItNowPrice { get; set; }
         public DateTime? EndTime { get; set; }
         public string ListingType { get; set; }
         public DateTime? StartTime { get; set; }

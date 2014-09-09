@@ -56,6 +56,9 @@ var CreateOrEditSearchConfigCtrl = ['$scope', '$http', '$routeParams', 'searchCo
                     response.latestRun = [];
                     $scope.model = response;
                     $scope.latestRun.SearchTime = parsers.date($scope.latestRun.SearchTime).toDateString();
+                    $scope.latestRun.Results = _.sortBy($scope.latestRun.Results, function(item) { return Number(item.UnitPrice); });
+//                    console.log("$scope.latestRun");
+//                    console.log($scope.latestRun);
 //                    console.log(response);
                 });
         };
@@ -81,10 +84,17 @@ var CreateOrEditSearchConfigCtrl = ['$scope', '$http', '$routeParams', 'searchCo
             if (!model.FoilOk && item.IsFoil)
                 return 'remove-foil';
             
-            console.log(String.format('item.UnitPrice: {0} < model.TargetPrice: {1}', item.UnitPrice, model.TargetPrice));
+//            console.log(String.format('item.UnitPrice: {0} < model.TargetPrice: {1}', item.UnitPrice, model.TargetPrice));
             
-            if (Number(item.UnitPrice) < Number(model.TargetPrice))
+            if (Number(item.UnitPrice) <= Number(model.TargetPrice))
                 return 'match';
+
+            return '';
+        };
+
+        $scope.calculateShippingClass = function(item) {
+            if (item.ShippingInfo.ShippingType == "Free")
+                return 'free';
 
             return '';
         };

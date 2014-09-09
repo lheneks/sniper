@@ -45,21 +45,22 @@
     </div>
 </div>
 
-
 <div class="row" ng-if="latestRun">
     <div class="col-sm-12">
         <table>
             <tr>
                 <td>Title</td>
                 <td>Current Price</td>
-                <td>Unit Price</td>
                 <td>Buy it now</td>
+                <td>Unit Price</td>
+                <td>Shipping</td>
             </tr>
             <tr ng-repeat="item in latestRun.Results | filter:filterFn" ng-class="calculateItemClass(model, item)">
                 <td><a href="{{item.ViewItemURL}}">{{item.Title}}</a></td>
                 <td>{{item.SellingStatus.CurrentPrice}}</td>
+                <td class="{{item.ListingInfo.BuyItNowAvailable && 'bin' || ''}}">{{item.ListingInfo.BuyItNowAvailable && item.ListingInfo.BuyItNowPrice || 'n/a'}}</td>
                 <td>{{item.UnitPrice}}</td>
-                <td>{{item.ListingInfo.BuyItNowAvailable}}</td>
+                <td class="{{item.ShippingInfo.ShippingType}}">{{item.ShippingInfo.ShippingType =='Free'&& 'Free' || item.ShippingInfo.ShippingServiceCost}}</td>
             </tr>
         </table>
     </div>

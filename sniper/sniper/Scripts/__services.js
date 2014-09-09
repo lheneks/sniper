@@ -115,20 +115,31 @@ sniper.factory('ebayService', ['$http', function ($http) {
                 return array ? array[0] : {};
             };
             
-            var p = function (title, value) {
-                console.log(title + " ----- " + value + " ------ " + title.toLowerCase().indexOf("4x") + " ------ " + title.toLowerCase().indexOf("x4"));
-                
-                if (title.toLowerCase().indexOf("4x") > -1 || title.toLowerCase().indexOf("x4") > -1) {
-                    return value / 4;
-                }
-                if (title.toLowerCase().indexOf("3x") > -1 || title.toLowerCase().indexOf("x3") > -1) {
-                    return value / 3;
-                }
-                if (title.toLowerCase().indexOf("2x") > -1 || title.toLowerCase().indexOf("x2") > -1) {
-                    return value / 2;
+            var p = function (title, currentPrice, buyItNow, shippingInfo) {
+
+                var shippingCost = a(shippingInfo.shippingServiceCost).__value__;
+                var price = shippingCost ? Number(shippingCost) : 0.0;
+
+
+                if (buyItNow && buyItNow.length > 0) {
+                    price += Number(buyItNow[0].__value__);
+                    console.log(title + " ----- price: " + price + " ------ buy it now: " + buyItNow[0].__value__ + " shippingCost: " + shippingCost);
+                } else {
+                    price += Number(currentPrice);
+                    console.log(title + " ----- price: " + price + " ------ currentPrice: " + currentPrice + " shippingCost: " + shippingCost);
                 }
 
-                return value;
+                if (title.toLowerCase().indexOf("4x") > -1 || title.toLowerCase().indexOf("x4") > -1) {
+                    return price / 4;
+                }
+                if (title.toLowerCase().indexOf("3x") > -1 || title.toLowerCase().indexOf("x3") > -1) {
+                    return price / 3;
+                }
+                if (title.toLowerCase().indexOf("2x") > -1 || title.toLowerCase().indexOf("x2") > -1) {
+                    return price / 2;
+                }
+
+                return price;
             };
             
            return $http.jsonp(url)
@@ -136,15 +147,19 @@ sniper.factory('ebayService', ['$http', function ($http) {
                     var results = [];
 
                     var items = data.data.findItemsByKeywordsResponse[0].searchResult[0].item;
-                    console.log("raw");
-                    console.log(items);
+//                    console.log("raw");
+//                    console.log(items);
+//                    console.log("shippingInfo");
 
                     _.each(items, function(item) {
                         var listingInfo = item.listingInfo[0];
                         var sellingStatus = item.sellingStatus[0];
+                        var shippingInfo = a(item.shippingInfo);
+
+                        //                        console.log(shippingInfo);
 
                         results.push({
-                            UnitPrice: p(a(item.title), sellingStatus.currentPrice[0].__value__),
+                            UnitPrice: p(a(item.title), sellingStatus.currentPrice[0].__value__,listingInfo.buyItNowPrice, shippingInfo),
                             Condition: a(item.condition),
                             Country: a(item.country),
                             GalleryUrl: a(item.galleryURL),
@@ -152,6 +167,7 @@ sniper.factory('ebayService', ['$http', function ($http) {
                             ListingInfo: {
                                 BestOfferEnabled: a(listingInfo.bestOfferEnabled),
                                 BuyItNowAvailable: a(listingInfo.buyItNowAvailable),
+                                BuyItNowPrice: a(listingInfo.buyItNowPrice).__value__,
                                 EndTime: a(listingInfo.endTime),
                                 ListingType: a(listingInfo.listingType),
                                 StartTime: a(listingInfo.startTime)
@@ -162,7 +178,7 @@ sniper.factory('ebayService', ['$http', function ($http) {
                                 SellingState: a(sellingStatus.sellingState),
                                 TimeLeft: a(sellingStatus.timeLeft)
                             },
-                            ShippingInfo: { ShippingType: a(a(item.shippingInfo).shippingType) },
+                            ShippingInfo: { ShippingType: a(shippingInfo.shippingType), ShippingServiceCost:a(shippingInfo.shippingServiceCost).__value__ },
                             Title: a(item.title),
                             TopRatedListing: a(item.topRatedListing),
                             ViewItemUrl: a(item.viewItemURL)

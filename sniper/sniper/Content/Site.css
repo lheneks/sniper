@@ -38,3 +38,8 @@ tr.match {
 tr.remove-foil {
     display: none;
 }
+
+tr td.Free, tr td.bin {
+    background-color: darkolivegreen;
+    color: white;
+}
