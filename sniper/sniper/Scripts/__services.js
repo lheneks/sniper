@@ -41,9 +41,9 @@ sniper.factory('parsers',[ function() {
     };
 }]);
 
-sniper.factory('ebayService', ['$http', function ($http) {
+sniper.factory('ebayService', ['$http', '$q', function ($http, $q) {
   
-    var searchUrl = function (keywords) {
+    var searchUrl = function (keywords, page) {
         keywords = "mtg " + keywords + " -alter -altered -custom -proxy";
         keywords = keywords.replace(" ", "%20");
 
@@ -102,91 +102,122 @@ sniper.factory('ebayService', ['$http', function ($http) {
         url += "&REST-PAYLOAD";
         url += "&keywords=" + keywords;
         url += "&paginationInput.entriesPerPage=100";
+        url += "&paginationInput.pageNumber=" + page;
         url += filters;
 
         return url;
     };
-    
+
     return {
         search: function(keywords) {
-            var url = searchUrl(keywords);
-
-            var a = function (array) {
+            var a = function(array) {
                 return array ? array[0] : {};
             };
-            
-            var p = function (title, currentPrice, buyItNow, shippingInfo) {
+
+            var p = function(title, currentPrice, buyItNow, shippingInfo) {
 
                 var shippingCost = a(shippingInfo.shippingServiceCost).__value__;
                 var price = shippingCost ? Number(shippingCost) : 0.0;
 
-
                 if (buyItNow && buyItNow.length > 0) {
                     price += Number(buyItNow[0].__value__);
-                    console.log(title + " ----- price: " + price + " ------ buy it now: " + buyItNow[0].__value__ + " shippingCost: " + shippingCost);
+//                    console.log(title + " ----- price: " + price + " ------ buy it now: " + buyItNow[0].__value__ + " shippingCost: " + shippingCost);
                 } else {
                     price += Number(currentPrice);
-                    console.log(title + " ----- price: " + price + " ------ currentPrice: " + currentPrice + " shippingCost: " + shippingCost);
+//                    console.log(title + " ----- price: " + price + " ------ currentPrice: " + currentPrice + " shippingCost: " + shippingCost);
                 }
 
-                if (title.toLowerCase().indexOf("4x") > -1 || title.toLowerCase().indexOf("x4") > -1) {
-                    return price / 4;
-                }
-                if (title.toLowerCase().indexOf("3x") > -1 || title.toLowerCase().indexOf("x3") > -1) {
-                    return price / 3;
-                }
-                if (title.toLowerCase().indexOf("2x") > -1 || title.toLowerCase().indexOf("x2") > -1) {
-                    return price / 2;
+                for (var i = 1; i < 26; ++i) {
+                    var lowerCase = title.toLowerCase();
+                    if (lowerCase.indexOf(i + "x") > -1 || lowerCase.indexOf("x" + i) > -1 || lowerCase.indexOf("x " + i) > -1 || lowerCase.indexOf(i + " x") > -1) {
+                        if (i == 10) {
+                            console.log("price: " + price + " unitprice: " + (price / 10));
+                        }
+                        return price / i;
+                    }
                 }
 
                 return price;
             };
             
-           return $http.jsonp(url)
-                .then(function(data) {
-                    var results = [];
+            function doQuery(oage) {
+                var d = $q.defer();
+                var url = searchUrl(keywords, oage);
 
-                    var items = data.data.findItemsByKeywordsResponse[0].searchResult[0].item;
-//                    console.log("raw");
-//                    console.log(items);
-//                    console.log("shippingInfo");
+                $http.jsonp(url)
+                    .then(function (data) {
+                        var results = [];
 
-                    _.each(items, function(item) {
-                        var listingInfo = item.listingInfo[0];
-                        var sellingStatus = item.sellingStatus[0];
-                        var shippingInfo = a(item.shippingInfo);
+                        var items = data.data.findItemsByKeywordsResponse[0].searchResult[0].item;
 
-                        //                        console.log(shippingInfo);
+                        _.each(items, function (item) {
+                            var listingInfo = item.listingInfo[0];
+                            var sellingStatus = item.sellingStatus[0];
+                            var shippingInfo = a(item.shippingInfo);
 
-                        results.push({
-                            UnitPrice: p(a(item.title), sellingStatus.currentPrice[0].__value__,listingInfo.buyItNowPrice, shippingInfo),
-                            Condition: a(item.condition),
-                            Country: a(item.country),
-                            GalleryUrl: a(item.galleryURL),
-                            ItemId: a(item.itemId),
-                            ListingInfo: {
-                                BestOfferEnabled: a(listingInfo.bestOfferEnabled),
-                                BuyItNowAvailable: a(listingInfo.buyItNowAvailable),
-                                BuyItNowPrice: a(listingInfo.buyItNowPrice).__value__,
-                                EndTime: a(listingInfo.endTime),
-                                ListingType: a(listingInfo.listingType),
-                                StartTime: a(listingInfo.startTime)
-                            },
-                            SellingStatus: {
-                                ConvertedCurrentPrice: sellingStatus.convertedCurrentPrice[0].__value__,
-                                CurrentPrice: sellingStatus.currentPrice[0].__value__,
-                                SellingState: a(sellingStatus.sellingState),
-                                TimeLeft: a(sellingStatus.timeLeft)
-                            },
-                            ShippingInfo: { ShippingType: a(shippingInfo.shippingType), ShippingServiceCost:a(shippingInfo.shippingServiceCost).__value__ },
-                            Title: a(item.title),
-                            TopRatedListing: a(item.topRatedListing),
-                            ViewItemUrl: a(item.viewItemURL)
+                            results.push({
+                                UnitPrice: p(a(item.title), sellingStatus.currentPrice[0].__value__, listingInfo.buyItNowPrice, shippingInfo),
+                                Condition: a(item.condition),
+                                Country: a(item.country),
+                                GalleryUrl: a(item.galleryURL),
+                                ItemId: a(item.itemId),
+                                ListingInfo: {
+                                    BestOfferEnabled: a(listingInfo.bestOfferEnabled),
+                                    BuyItNowAvailable: a(listingInfo.buyItNowAvailable),
+                                    BuyItNowPrice: a(listingInfo.buyItNowPrice).__value__,
+                                    EndTime: a(listingInfo.endTime),
+                                    ListingType: a(listingInfo.listingType),
+                                    StartTime: a(listingInfo.startTime)
+                                },
+                                SellingStatus: {
+                                    ConvertedCurrentPrice: sellingStatus.convertedCurrentPrice[0].__value__,
+                                    CurrentPrice: sellingStatus.currentPrice[0].__value__,
+                                    SellingState: a(sellingStatus.sellingState),
+                                    TimeLeft: a(sellingStatus.timeLeft)
+                                },
+                                ShippingInfo: { ShippingType: a(shippingInfo.shippingType), ShippingServiceCost: a(shippingInfo.shippingServiceCost).__value__ },
+                                Title: a(item.title),
+                                TopRatedListing: a(item.topRatedListing),
+                                ViewItemUrl: a(item.viewItemURL)
+                            });
                         });
-                    });
 
-                    return results;
-                });
-        }
+                        d.resolve(results);
+                    });
+                
+                return d.promise;
+            }
+
+
+            return $q.all([
+                doQuery(1),
+                doQuery(2),
+                doQuery(3),
+                doQuery(4),
+                doQuery(5)
+            ]).then(function(data) {
+                var searchResults = [];
+                searchResults = searchResults.concat(data[0]);
+                
+                if (data[0].length == 100) {
+                    searchResults = searchResults.concat(data[1]);
+                    
+                    if (data[1].length == 100) {
+                        searchResults = searchResults.concat(data[2]);
+                        
+                        if (data[2].length == 100) {
+                            searchResults = searchResults.concat(data[3]);
+                            
+                            if (data[3].length == 100) {
+                                searchResults = searchResults.concat(data[4]);
+                            }
+                        }
+                    }
+                }
+
+                console.log(searchResults);
+                return searchResults;
+            });
+        }        
     };
 }]);

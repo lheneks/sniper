@@ -41,8 +41,8 @@ var SearchListCtrl = ['$scope', 'searchConfigService', 'ebayService',
         $scope.init();
     }];
 
-var CreateOrEditSearchConfigCtrl = ['$scope', '$http', '$routeParams', 'searchConfigService', 'parsers',
-    function ($scope, $http, $routeParams, searchConfigService, parsers) {
+var CreateOrEditSearchConfigCtrl = ['$scope', '$http', '$routeParams', '$timeout', 'searchConfigService', 'parsers',
+    function ($scope, $http, $routeParams, $timeout, searchConfigService, parsers) {
 
         $scope.model = {};
         $scope.latestRun = {};
@@ -60,6 +60,16 @@ var CreateOrEditSearchConfigCtrl = ['$scope', '$http', '$routeParams', 'searchCo
 //                    console.log("$scope.latestRun");
 //                    console.log($scope.latestRun);
 //                    console.log(response);
+                }).then(function () {
+                    $timeout(function() {
+                        var hightlight = "";
+                        for (var i = 1; i < 26; ++i) {
+                            hightlight += i + "x x" + i + " ";
+                        }
+                        console.log(hightlight);
+                        var hilighter = new Hilitor();
+                        hilighter.apply(hightlight);
+                    }, 5000);
                 });
         };
 
