@@ -15,8 +15,9 @@
         @Scripts.Render("~/bundles/libjs")
     </head>
 
+@*    <body block-ui block-ui-pattern="/.*/">*@
     <body>
-@*    <body ng-controller="ApplicationController">*@
+        @*    <body ng-controller="ApplicationController">*@
         <div class="navbar navbar-inverse navbar-fixed-top">
             <div class="container">
                 <div class="navbar-header">
@@ -48,6 +49,7 @@
     </body>
 
     <script type="text/javascript">
+//        var sniper = angular.module('sniper', ['LocalStorageModule', 'ngRoute', 'ngAnimate', 'blockUI'], function ($provide) {
         var sniper = angular.module('sniper', ['LocalStorageModule', 'ngRoute', 'ngAnimate'], function ($provide) {
             $provide.factory('ControllerCommunicator', ['$rootScope', function ($rootScope) {
                 return {

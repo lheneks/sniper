@@ -15,6 +15,7 @@ namespace sniper
 //                        .Include("~/Scripts/angular-route.js")
 //                        .Include("~/Scripts/angular-animate.js")
                         .Include("~/Scripts/localStorageModule.js")
+                        .Include("~/Scripts/angular-block-ui.js")
                         );
             
             bundles.Add(new ScriptBundle("~/bundles/appjs")
@@ -25,7 +26,9 @@ namespace sniper
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
-                      "~/Content/site.css"));
+                      "~/Content/angular-block-ui.css",
+                      "~/Content/site.css"
+                      ));
 
             // Set EnableOptimizations to false for debugging. For more information,
             // visit http://go.microsoft.com/fwlink/?LinkId=301862
