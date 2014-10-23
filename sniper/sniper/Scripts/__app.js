@@ -38,6 +38,11 @@ var SearchListCtrl = ['$scope', 'searchConfigService', 'ebayService',
             });
         };
         
+        $scope.deleteConfig = function (id) {
+            searchConfigService.deleteConfig(id);
+            $scope.searchConfigs = _.reject($scope.searchConfigs, function (item) { return item.Id == id; });
+        };
+        
         $scope.init();
     }];
 
@@ -73,12 +78,26 @@ var CreateOrEditSearchConfigCtrl = ['$scope', '$http', '$routeParams', '$timeout
                 });
         };
 
+        $scope.isItemBuyItNow = function(item) {
+            return item.ListingInfo.BuyItNowAvailable || item.ListingInfo.ListingType == 'FixedPrice';
+        };
+
+        $scope.itemBuyItNowPrice = function (item) {
+            if (item.ListingInfo.BuyItNowAvailable)
+                return item.ListingInfo.BuyItNowPrice;
+            else if (item.ListingInfo.ListingType == 'FixedPrice')
+                return item.SellingStatus.CurrentPrice;
+            else
+                return 'n/a';
+        };
+        
         $scope.saveConfig = function() {
             searchConfigService.save( $scope.model ).then(function() {
                 $scope.showSavedMessage = true;
             });
         };
-        
+
+
         $scope.filterFn = function (item) {
             if (!$scope.model.filterText || $scope.model.filterText == "")
                 return true;

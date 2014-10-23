@@ -20,6 +20,9 @@
         },
         saveRun: function(configId, runData) {
             $http.post('/SearchConfigApi/SaveRunData/', { SearchTime: new Date(), SearchConfigId: configId, Results: runData });
+        },
+        deleteConfig: function(configId) {
+            $http.post('/SearchConfigApi/DeleteConfig/', { configId: configId });
         }
     };
 }]);
@@ -114,8 +117,9 @@ sniper.factory('ebayService', ['$http', '$q', function ($http, $q) {
                 return array ? array[0] : {};
             };
 
-            var p = function(title, currentPrice, buyItNow, shippingInfo) {
+            var p = function(title, currentPrice, listingInfo, shippingInfo) {
 
+                var buyItNow = listingInfo.buyItNowPrice;
                 var shippingCost = a(shippingInfo.shippingServiceCost).__value__;
                 var price = shippingCost ? Number(shippingCost) : 0.0;
 
@@ -156,7 +160,7 @@ sniper.factory('ebayService', ['$http', '$q', function ($http, $q) {
                             var shippingInfo = a(item.shippingInfo);
 
                             results.push({
-                                UnitPrice: p(a(item.title), sellingStatus.currentPrice[0].__value__, listingInfo.buyItNowPrice, shippingInfo),
+                                UnitPrice: p(a(item.title), sellingStatus.currentPrice[0].__value__, listingInfo, shippingInfo),
                                 Condition: a(item.condition),
                                 Country: a(item.country),
                                 GalleryUrl: a(item.galleryURL),

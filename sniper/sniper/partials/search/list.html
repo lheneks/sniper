@@ -2,5 +2,6 @@
 <div class="config-tile" ng-repeat="s in searchConfigs">
     <a href="#/search/edit/{{s.Id}}">[edit]</a>
     <a href="javascript:;" ng-click="runSearch(s)">[RUN]</a>
+    <a href="javascript:;" ng-click="deleteConfig(s.Id)">[X]</a>
     <span ng-if="s.hasRun"> &lt;RAN!&gt; </span>{{s.Keywords}}
 </div>
